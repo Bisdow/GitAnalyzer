@@ -1,4 +1,4 @@
-package main
+package gitLogScanner
 
 import (
 	"reflect"
@@ -6,7 +6,7 @@ import (
 )
 
 func TestAnalyzeCommitsValidInput(t *testing.T) {
-	commits := []Commit{
+	commits := []commit{
 		{
 			author:       "John Doe",
 			date:         "2023-10-01",
@@ -22,8 +22,8 @@ func TestAnalyzeCommitsValidInput(t *testing.T) {
 	}
 
 	expectedOutput := []FileChange{
-		{name: "file2.txt", count: 2},
-		{name: "file1.txt", count: 1},
+		{Name: "file2.txt", Count: 2},
+		{Name: "file1.txt", Count: 1},
 	}
 
 	fileChanges := analyzeCommits(commits)
@@ -34,7 +34,7 @@ func TestAnalyzeCommitsValidInput(t *testing.T) {
 }
 
 func TestAnalyzeCommitsEmptyInput(t *testing.T) {
-	commits := []Commit{}
+	commits := []commit{}
 
 	expectedOutput := []FileChange{}
 
@@ -46,7 +46,7 @@ func TestAnalyzeCommitsEmptyInput(t *testing.T) {
 }
 
 func TestAnalyzeCommitsSingleCommit(t *testing.T) {
-	commits := []Commit{
+	commits := []commit{
 		{
 			author:       "John Doe",
 			date:         "2023-10-01",
@@ -56,7 +56,7 @@ func TestAnalyzeCommitsSingleCommit(t *testing.T) {
 	}
 
 	expectedOutput := []FileChange{
-		{name: "file1.txt", count: 1},
+		{Name: "file1.txt", Count: 1},
 	}
 
 	fileChanges := analyzeCommits(commits)
@@ -67,7 +67,7 @@ func TestAnalyzeCommitsSingleCommit(t *testing.T) {
 }
 
 func TestAnalyzeCommitsMultipleCommitsSameFile(t *testing.T) {
-	commits := []Commit{
+	commits := []commit{
 		{
 			author:       "John Doe",
 			date:         "2023-10-01",
@@ -83,7 +83,7 @@ func TestAnalyzeCommitsMultipleCommitsSameFile(t *testing.T) {
 	}
 
 	expectedOutput := []FileChange{
-		{name: "file1.txt", count: 2},
+		{Name: "file1.txt", Count: 2},
 	}
 
 	fileChanges := analyzeCommits(commits)

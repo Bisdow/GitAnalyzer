@@ -1,4 +1,4 @@
-package main
+package gitLogScanner
 
 import (
 	"reflect"
@@ -10,7 +10,7 @@ func TestScanLogsSingleCommit(t *testing.T) {
 10	5	file1.txt
 `
 
-	expectedCommits := []Commit{
+	expectedCommits := []commit{
 		{
 			author:       "John Doe",
 			date:         "2023-10-01",
@@ -36,7 +36,7 @@ func TestScanLogs(t *testing.T) {
 2	1	file2.txt
 `
 
-	expectedCommits := []Commit{
+	expectedCommits := []commit{
 		{
 			author:       "John Doe",
 			date:         "2023-10-01",

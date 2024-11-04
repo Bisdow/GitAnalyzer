@@ -1,21 +1,28 @@
-package main
+package gitLogScanner
 
 import (
 	"bufio"
 	"strings"
 )
 
-func scanLog(log string) []Commit {
-	var commits []Commit
+type commit struct {
+	author       string
+	date         string
+	commitHash   string
+	changedFiles []string
+}
+
+func scanLog(log string) []commit {
+	var commits []commit
 	scanner := bufio.NewScanner(strings.NewReader(log))
 
-	var currentCommit Commit
+	var currentCommit commit
 
 	for scanner.Scan() {
 		line := scanner.Text()
 		if strings.HasPrefix(line, "--") {
-			// Commit header
-			currentCommit = Commit{}
+			// commit header
+			currentCommit = commit{}
 			commitParts := strings.Split(line, "--")
 			currentCommit.commitHash = commitParts[1]
 			currentCommit.date = commitParts[2]
@@ -23,7 +30,7 @@ func scanLog(log string) []Commit {
 			continue
 		}
 		if line != "" {
-			// Commit changed file information
+			// commit changed file information
 			changedFileParts := strings.Split(line, "\t")
 			currentCommit.changedFiles = append(currentCommit.changedFiles, changedFileParts[2])
 			continue

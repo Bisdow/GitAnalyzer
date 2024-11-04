@@ -1,29 +1,58 @@
 package main
 
 import (
+	"Code_Analyzer/gitLogScanner"
 	"fmt"
+	"github.com/boyter/scc/processor"
+	"os"
 )
 
-type Commit struct {
-	author       string
-	date         string
-	commitHash   string
-	changedFiles []string
-}
-
-type FileChange struct {
-	name  string
-	count int
-}
-
 func main() {
-	gitLogs := getGitLogs()
-	commits := scanLog(gitLogs)
-	sortedResults :=
-		analyzeCommits(commits)
+	sortedResults := gitLogScanner.ScanLog()
+
+	fileInfos := countLinesOfCode(sortedResults)
 
 	// Output
-	for _, change := range sortedResults {
-		fmt.Printf("%d: %s\n", change.count, change.name)
+	fmt.Println("Changes: LoC --- Filename")
+	for _, change := range fileInfos {
+		fmt.Printf("%d: %d --- %s\n", change.changes, change.loc, change.name)
 	}
+}
+
+type FileInfo struct {
+	name    string
+	changes int
+	loc     int64
+}
+
+func countLinesOfCode(files []gitLogScanner.FileChange) []FileInfo {
+	var fileInfos []FileInfo
+
+	for _, file := range files {
+		currentFileInfo := FileInfo{
+			name:    file.Name,
+			changes: file.Count,
+			loc:     loc(file.Name),
+		}
+		fileInfos = append(fileInfos, currentFileInfo)
+	}
+	return fileInfos
+}
+
+func loc(fileName string) int64 {
+	content, err := os.ReadFile(fileName)
+	if err != nil {
+		fmt.Println("Datei konnte nicht geöffnet werden")
+		os.Exit(1)
+	}
+
+	filejob := &processor.FileJob{
+		Filename: fileName,
+		Content:  content,
+		Bytes:    int64(len(content)),
+	}
+
+	processor.ProcessConstants()
+	processor.CountStats(filejob)
+	return filejob.Code
 }
