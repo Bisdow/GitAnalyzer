@@ -1,11 +1,18 @@
 package gitLogScanner
 
 import (
+	"os"
 	"reflect"
 	"testing"
 )
 
 func TestAnalyzeCommitsValidInput(t *testing.T) {
+	// Mock os.Stat
+	checkFileExists = func(name string) (os.FileInfo, error) {
+		return nil, nil
+	}
+	defer func() { checkFileExists = os.Stat }()
+
 	commits := []commit{
 		{
 			author:       "John Doe",
@@ -34,6 +41,12 @@ func TestAnalyzeCommitsValidInput(t *testing.T) {
 }
 
 func TestAnalyzeCommitsEmptyInput(t *testing.T) {
+	// Mock os.Stat
+	checkFileExists = func(name string) (os.FileInfo, error) {
+		return nil, nil
+	}
+	defer func() { checkFileExists = os.Stat }()
+
 	commits := []commit{}
 
 	expectedOutput := []FileChange{}
@@ -46,6 +59,12 @@ func TestAnalyzeCommitsEmptyInput(t *testing.T) {
 }
 
 func TestAnalyzeCommitsSingleCommit(t *testing.T) {
+	// Mock os.Stat
+	checkFileExists = func(name string) (os.FileInfo, error) {
+		return nil, nil
+	}
+	defer func() { checkFileExists = os.Stat }()
+
 	commits := []commit{
 		{
 			author:       "John Doe",
@@ -67,6 +86,12 @@ func TestAnalyzeCommitsSingleCommit(t *testing.T) {
 }
 
 func TestAnalyzeCommitsMultipleCommitsSameFile(t *testing.T) {
+	// Mock os.Stat
+	checkFileExists = func(name string) (os.FileInfo, error) {
+		return nil, nil
+	}
+	defer func() { checkFileExists = os.Stat }()
+
 	commits := []commit{
 		{
 			author:       "John Doe",

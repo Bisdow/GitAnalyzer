@@ -5,6 +5,8 @@ import (
 	"sort"
 )
 
+var checkFileExists = os.Stat
+
 func analyzeCommits(commits []commit) []FileChange {
 	// Collect
 	fileChanges := make(map[string]int)
@@ -17,7 +19,7 @@ func analyzeCommits(commits []commit) []FileChange {
 	// Sorting
 	sortedChanges := []FileChange{}
 	for name, count := range fileChanges {
-		if _, err := os.Stat(name); err != nil {
+		if _, err := checkFileExists(name); err != nil {
 			continue
 		}
 		sortedChanges = append(sortedChanges, FileChange{name, count})
@@ -27,14 +29,4 @@ func analyzeCommits(commits []commit) []FileChange {
 	})
 
 	return sortedChanges
-}
-
-func removeNotExistentFiles(files []FileChange) []FileChange {
-	existingFiles := []FileChange{}
-	for _, file := range files {
-		if _, err := os.Stat(file.Name); err == nil {
-			existingFiles = append(existingFiles, file)
-		}
-	}
-	return existingFiles
 }
