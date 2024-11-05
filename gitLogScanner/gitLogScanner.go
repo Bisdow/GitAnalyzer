@@ -5,8 +5,8 @@ type FileChange struct {
 	Count int
 }
 
-func ScanLog() []FileChange {
+func ScanLog() []FileChangeInfo {
 	gitLogs := getGitLogs()
 	commits := scanLog(gitLogs)
-	return analyzeCommits(commits)
+	return analyze(commits)
 }
