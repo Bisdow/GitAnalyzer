@@ -1,16 +1,18 @@
 package commitAnalyzer
 
 import (
+	"Code_Analyzer/gitLog"
 	"github.com/boyter/scc/processor"
 	"os"
 	"path/filepath"
 )
 
 type File struct {
-	FileId    string
-	Content   *FileContent
-	RenamedTo *File
-	Removed   bool
+	FileId           string
+	Content          *FileContent
+	RenamedTo        *File
+	Removed          bool
+	touchedInCommits []*gitLog.CommitInfo
 }
 
 type FileContent struct {
@@ -28,20 +30,24 @@ func (f *File) SetId(fileId string) {
 	f.FileId = fileId
 }
 
-func (f File) GetExtension() string {
+func (f *File) GetExtension() string {
 	return filepath.Ext(f.FileId)
 }
 
-func (f File) GetFilename() string {
+func (f *File) GetFilename() string {
 	return filepath.Base(f.FileId)
 }
 
-func (f File) GetPath() string {
+func (f *File) GetPath() string {
 	return filepath.Dir(f.FileId)
 }
 
 func (f *File) SetRenamedTo(file *File) {
 	f.RenamedTo = file
+}
+
+func (f *File) addCommit(commit *gitLog.CommitInfo) {
+	f.touchedInCommits = append(f.touchedInCommits, commit)
 }
 
 var readFile = os.ReadFile
