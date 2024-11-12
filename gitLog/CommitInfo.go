@@ -7,10 +7,13 @@ import (
 	"time"
 )
 
+const fileLineInfoSeparator = "\t"
+const fileRenameSeparator = " => "
+
 type FileChangeInfo struct {
 	FileName     string
-	LinesAdded   int
-	LinesRemoved int
+	LinesAdded   *int
+	LinesRemoved *int
 	RenamedFile  string
 }
 
@@ -57,27 +60,28 @@ func (c *CommitInfo) AddChangedFile(line string) error {
 	9       9       analyzeCommits_test.go => gitLogScanner/analyzeCommits_test.go
 	*/
 	cf := FileChangeInfo{}
-	elements := strings.Split(line, " ")
-	linesAdded, err := strconv.ParseInt(elements[0], 10, 64)
-	if err != nil {
-		return errors.New(elements[0] + " is not a number")
-	}
-	cf.LinesAdded = int(linesAdded)
+	elements := strings.Split(line, fileLineInfoSeparator)
 
-	linesRemoved, err := strconv.ParseInt(elements[1], 10, 64)
+	linesAdded, err := parseLineAmount(elements[0])
 	if err != nil {
-		return errors.New(elements[1] + " is not a number")
+		return err
 	}
-	cf.LinesRemoved = int(linesRemoved)
-	if len(elements) == 3 {
+	cf.LinesAdded = linesAdded
+
+	linesRemoved, err := parseLineAmount(elements[1])
+	if err != nil {
+		return err
+	}
+	cf.LinesRemoved = linesRemoved
+
+	if !strings.Contains(elements[2], fileRenameSeparator) {
 		// created / deleted or modified file
 		cf.FileName = elements[2]
-	} else if len(elements) == 5 {
-		// moved or renamed file
-		cf.FileName = elements[2]
-		cf.RenamedFile = elements[4]
 	} else {
-		return errors.New("Unsupported Format of: " + line)
+		// moved or renamed file
+		fileNames := strings.Split(elements[2], fileRenameSeparator)
+		cf.FileName = fileNames[0]
+		cf.RenamedFile = fileNames[1]
 	}
 	c.ChangedFiles = append(c.ChangedFiles, cf)
 	return nil
@@ -90,4 +94,16 @@ func parseDateTime(dateTime string) (time.Time, error) {
 		return result, err
 	}
 	return result, nil
+}
+
+func parseLineAmount(str string) (*int, error) {
+	if str == "-" {
+		return nil, nil
+	}
+	lines, err := strconv.ParseInt(str, 10, 64)
+	if err != nil {
+		return nil, errors.New(str + " is not a number")
+	}
+	linesInt := int(lines)
+	return &linesInt, nil
 }

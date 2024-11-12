@@ -15,11 +15,11 @@ func TestExtractCommits(t *testing.T) {
 	committerDate := "2000-12-31T23:59:59+01:00"
 	commitMessage := "And the world is round"
 	changedFileModified := []string{"12", "0", "myFolder/Added.go"}
-	changedFileMoved := []string{"1", "2", "myFolder/moved.go", "=>", "newFolder/newName"}
+	changedFileMoved := []string{"1", "2", "myFolder/moved.go", "newFolder/newName"}
 
 	log := strings.Join([]string{"", hash, authorDate, author, committerDate, committer, commitMessage, ""}, headerSeperator)
-	log = log + "\n" + strings.Join(changedFileModified, " ")
-	log = log + "\n" + strings.Join(changedFileMoved, " ")
+	log = log + "\n" + strings.Join(changedFileModified, fileLineInfoSeparator)
+	log = log + "\n" + changedFileMoved[0] + fileLineInfoSeparator + changedFileMoved[1] + fileLineInfoSeparator + changedFileMoved[2] + fileRenameSeparator + changedFileMoved[3]
 
 	commits, err := extractCommits(log)
 	if err != nil {
@@ -28,6 +28,10 @@ func TestExtractCommits(t *testing.T) {
 
 	authorDateTime, _ := time.Parse(time.RFC3339, authorDate)
 	committerDateTime, _ := time.Parse(time.RFC3339, committerDate)
+	linesAdded1 := 12
+	linesRemoved1 := 0
+	linesAdded2 := 1
+	linesRemoved2 := 2
 	expected := []CommitInfo{
 		{
 			CommitHash:        hash,
@@ -38,15 +42,15 @@ func TestExtractCommits(t *testing.T) {
 			ChangedFiles: []FileChangeInfo{
 				{
 					FileName:     changedFileModified[2],
-					LinesAdded:   12,
-					LinesRemoved: 0,
+					LinesAdded:   &linesAdded1,
+					LinesRemoved: &linesRemoved1,
 					RenamedFile:  "",
 				},
 				{
 					FileName:     changedFileMoved[2],
-					LinesAdded:   1,
-					LinesRemoved: 2,
-					RenamedFile:  changedFileMoved[4],
+					LinesAdded:   &linesAdded2,
+					LinesRemoved: &linesRemoved2,
+					RenamedFile:  changedFileMoved[3],
 				},
 			},
 		},

@@ -35,6 +35,8 @@ func analyzeCommit(commit *gitLog.CommitInfo, files *map[string]File) {
 			renamedFile.AnalyzeContent()
 			(*files)[renamedFile.FileId] = renamedFile
 			currentFile.SetRenamedTo(&renamedFile)
+			currentFile.addCommitsBeforeRenamed(renamedFile.touchedBeforeRenamedInCommits)
+			currentFile.addCommitsBeforeRenamed(renamedFile.touchedInCommits)
 		}
 		(*files)[currentFile.FileId] = currentFile
 	}

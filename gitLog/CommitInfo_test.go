@@ -81,16 +81,19 @@ func TestCommitInfo_AddChangedFileModified(t *testing.T) {
 	addLines := 11
 	removedLines := 22
 	filePath := "myFiles/myFile.go"
-	line := strings.Join([]string{strconv.FormatInt(int64(addLines), 10), strconv.FormatInt(int64(removedLines), 10), filePath}, " ")
+	line := strings.Join([]string{strconv.FormatInt(int64(addLines), 10), strconv.FormatInt(int64(removedLines), 10), filePath}, fileLineInfoSeparator)
 	commit := CommitInfo{}
-	commit.AddChangedFile(line)
+	err := commit.AddChangedFile(line)
+	if err != nil {
+		t.Errorf("Error on AddChangedFile: \n%s", err)
+	}
 	if len(commit.ChangedFiles) != 1 {
 		t.Errorf("Expected %d files, but found %d", 1, len(commit.ChangedFiles))
 	}
 	expected := FileChangeInfo{
 		FileName:     filePath,
-		LinesAdded:   addLines,
-		LinesRemoved: removedLines,
+		LinesAdded:   &addLines,
+		LinesRemoved: &removedLines,
 		RenamedFile:  "",
 	}
 	if !reflect.DeepEqual(commit.ChangedFiles[0], expected) {
@@ -104,16 +107,19 @@ func TestCommitInfo_AddChangedFileMoved(t *testing.T) {
 	oldFileName := "myFiles/myFile.go"
 	newFileName := "newFolder/otherName.go"
 	filePath := strings.Join([]string{oldFileName, "=>", newFileName}, " ")
-	line := strings.Join([]string{strconv.FormatInt(int64(addLines), 10), strconv.FormatInt(int64(removedLines), 10), filePath}, " ")
+	line := strings.Join([]string{strconv.FormatInt(int64(addLines), 10), strconv.FormatInt(int64(removedLines), 10), filePath}, fileLineInfoSeparator)
 	commit := CommitInfo{}
-	commit.AddChangedFile(line)
+	err := commit.AddChangedFile(line)
+	if err != nil {
+		t.Errorf("Error on AddChangedFile: \n%s", err)
+	}
 	if len(commit.ChangedFiles) != 1 {
 		t.Errorf("Expected %d files, but found %d", 1, len(commit.ChangedFiles))
 	}
 	expected := FileChangeInfo{
 		FileName:     oldFileName,
-		LinesAdded:   addLines,
-		LinesRemoved: removedLines,
+		LinesAdded:   &addLines,
+		LinesRemoved: &removedLines,
 		RenamedFile:  newFileName,
 	}
 	if !reflect.DeepEqual(commit.ChangedFiles[0], expected) {

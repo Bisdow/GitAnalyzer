@@ -8,11 +8,12 @@ import (
 )
 
 type File struct {
-	FileId           string
-	Content          *FileContent
-	RenamedTo        *File
-	Removed          bool
-	touchedInCommits []*gitLog.CommitInfo
+	FileId                        string
+	Content                       *FileContent
+	RenamedTo                     *File
+	Removed                       bool
+	touchedInCommits              []*gitLog.CommitInfo
+	touchedBeforeRenamedInCommits []*gitLog.CommitInfo
 }
 
 type FileContent struct {
@@ -48,6 +49,17 @@ func (f *File) SetRenamedTo(file *File) {
 
 func (f *File) addCommit(commit *gitLog.CommitInfo) {
 	f.touchedInCommits = append(f.touchedInCommits, commit)
+}
+
+func (f *File) addCommitsBeforeRenamed(commits []*gitLog.CommitInfo) {
+	f.touchedBeforeRenamedInCommits = append(f.touchedBeforeRenamedInCommits, commits...)
+}
+
+func (f *File) ChangeAmount(withHistory bool) int {
+	if !withHistory {
+		return len(f.touchedInCommits)
+	}
+	return len(f.touchedBeforeRenamedInCommits) + len(f.touchedInCommits)
 }
 
 var readFile = os.ReadFile

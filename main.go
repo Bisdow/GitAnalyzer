@@ -1,28 +1,19 @@
 package main
 
 import (
-	"Code_Analyzer/gitLogScanner"
+	"Code_Analyzer/commitAnalyzer"
+	"Code_Analyzer/gitLog"
+	"Code_Analyzer/output"
 	"fmt"
-	"sort"
+	"os"
 )
 
 func main() {
-	fileInfos := gitLogScanner.ScanLog()
-
-	for i, _ := range fileInfos {
-		fileInfos[i].AnalyzeFile()
+	commits, err := gitLog.GetCommits()
+	if err != nil {
+		fmt.Println(err)
+		os.Exit(1)
 	}
-
-	sort.Slice(fileInfos, func(i, j int) bool {
-		return fileInfos[i].GetChangeAmmount() > fileInfos[j].GetChangeAmmount()
-	})
-
-	// Output
-	fmt.Println("Changes: LoC --- Filename")
-	for _, fileInfo := range fileInfos {
-		if fileInfo.FileInfo.Removed {
-			continue
-		}
-		fmt.Printf("%d: %d --- %s\n", fileInfo.GetChangeAmmount(), fileInfo.FileInfo.LinesOfCode, fileInfo.FileInfo.FileName)
-	}
+	files := commitAnalyzer.CommitAnalyzer(commits)
+	output.CliOutput(files)
 }
