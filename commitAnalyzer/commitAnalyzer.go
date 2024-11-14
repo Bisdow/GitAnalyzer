@@ -2,6 +2,7 @@ package commitAnalyzer
 
 import (
 	"Code_Analyzer/gitLog"
+	"github.com/boyter/scc/processor"
 	"slices"
 )
 
@@ -18,27 +19,43 @@ func CommitAnalyzer(gitLogCommits []gitLog.CommitInfo) map[string]File {
 		return a.AuthorDateTime.Compare(b.AuthorDateTime)
 	})
 
-	for _, commit := range gitLogCommits {
-		analyzeCommit(&commit, &files)
-	}
+	collectFiles(gitLogCommits, &files)
+	analyzeFilesConcurrently(&files)
 	return files
 }
 
-func analyzeCommit(commit *gitLog.CommitInfo, files *map[string]File) {
-	for _, gitFile := range commit.ChangedFiles {
-		currentFile := getFile(gitFile.FileName, files)
-		currentFile.AnalyzeContent()
-		currentFile.addCommit(commit)
-		if gitFile.RenamedFile != "" {
-			renamedFile := getFile(gitFile.RenamedFile, files)
-			renamedFile.addCommit(commit)
-			renamedFile.AnalyzeContent()
-			(*files)[renamedFile.FileId] = renamedFile
-			currentFile.SetRenamedTo(&renamedFile)
-			currentFile.addCommitsBeforeRenamed(renamedFile.touchedBeforeRenamedInCommits)
-			currentFile.addCommitsBeforeRenamed(renamedFile.touchedInCommits)
+func analyzeFilesConcurrently(files *map[string]File) {
+	processor.ProcessConstants()
+	result := make(chan File)
+	for _, file := range *files {
+		go analyzeFile(file, result)
+	}
+	for range *files {
+		file := <-result
+		(*files)[file.FileId] = file
+	}
+}
+
+func analyzeFile(file File, result chan (File)) {
+	file.AnalyzeContent()
+	result <- file
+}
+
+func collectFiles(gitLogCommits []gitLog.CommitInfo, files *map[string]File) {
+	for _, commit := range gitLogCommits {
+		for _, gitFile := range commit.ChangedFiles {
+			currentFile := getFile(gitFile.FileName, files)
+			currentFile.addCommit(&commit)
+			if gitFile.RenamedFile != "" {
+				renamedFile := getFile(gitFile.RenamedFile, files)
+				renamedFile.addCommit(&commit)
+				(*files)[renamedFile.FileId] = renamedFile
+				currentFile.SetRenamedTo(&renamedFile)
+				currentFile.addCommitsBeforeRenamed(renamedFile.touchedBeforeRenamedInCommits)
+				currentFile.addCommitsBeforeRenamed(renamedFile.touchedInCommits)
+			}
+			(*files)[currentFile.FileId] = currentFile
 		}
-		(*files)[currentFile.FileId] = currentFile
 	}
 }
 

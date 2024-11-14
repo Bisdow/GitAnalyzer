@@ -80,7 +80,7 @@ func (f *File) AnalyzeContent() {
 		Content:  content,
 		Bytes:    int64(len(content)),
 	}
-	processor.ProcessConstants()
+	// To work concurrently "processor.ProcessConstants()" must be called centrally beforehand
 	processor.CountStats(filejob)
 	f.Content.LinesOfCode = filejob.Code
 	f.Content.LinesOfComments = filejob.Comment
