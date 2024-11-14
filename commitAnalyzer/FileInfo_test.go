@@ -2,6 +2,7 @@ package commitAnalyzer
 
 import (
 	"errors"
+	"github.com/boyter/scc/processor"
 	"os"
 	"reflect"
 	"testing"
@@ -76,6 +77,8 @@ func TestFile_AnalyzeContent(t *testing.T) {
 	// Mocken von os.ReadFile
 	readFile = mockReadFile
 	defer func() { readFile = os.ReadFile }()
+	// Must be initialized before calling AnalyzeContent
+	processor.ProcessConstants()
 
 	underTest := NewFile("someFile.txt")
 	underTest.AnalyzeContent()

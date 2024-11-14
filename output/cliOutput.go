@@ -19,8 +19,8 @@ func CliOutput(filesMap map[string]commitAnalyzer.File) {
 		return b.ChangeAmount(true) - a.ChangeAmount(true)
 	})
 
-	fmt.Printf("Changes : Lines of Code  === Filename\n")
+	fmt.Printf("Changes : Lines of Code  === Filen\n")
 	for _, file := range files {
-		fmt.Printf("%d : %d === %s\n", file.ChangeAmount(true), file.Content.LinesOfCode, file.GetFilename())
+		fmt.Printf("%d : %d === %s\n", file.ChangeAmount(true), file.Content.LinesOfCode, file.FileId)
 	}
 }
