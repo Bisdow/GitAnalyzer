@@ -5,6 +5,7 @@ import (
 	"github.com/boyter/scc/processor"
 	"os"
 	"path/filepath"
+	"time"
 )
 
 type File struct {
@@ -60,6 +61,18 @@ func (f *File) ChangeAmount(withHistory bool) int {
 		return len(f.touchedInCommits)
 	}
 	return len(f.touchedBeforeRenamedInCommits) + len(f.touchedInCommits)
+}
+
+// GetRecentCommitScore gibt einen Wert zurück, der umso höher ist, je mehr Commits diese Datei in den letzten drei Monaten erlebt hat.
+func (f *File) GetRecentCommitScore() int {
+	score := 0
+	threeMonthsAgo := time.Now().AddDate(0, -3, 0)
+	for _, commit := range f.touchedInCommits {
+		if commit.AuthorDateTime.After(threeMonthsAgo) {
+			score++
+		}
+	}
+	return score
 }
 
 var readFile = os.ReadFile
