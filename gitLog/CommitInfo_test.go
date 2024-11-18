@@ -101,6 +101,25 @@ func TestCommitInfo_AddChangedFileModified(t *testing.T) {
 	}
 }
 
+func TestCommitInfo_AddChangeFileUnknownLines(t *testing.T) {
+	filePath := "myFiles/myFile.go"
+	line := strings.Join([]string{"-", "-", filePath}, fileLineInfoSeparator)
+	commit := CommitInfo{}
+	err := commit.AddChangedFile(line)
+	if err != nil {
+		t.Errorf("Error on AddChangedFileUnkownLines: \n%s", err)
+	}
+	expected := FileChangeInfo{
+		FileName:     filePath,
+		LinesAdded:   nil,
+		LinesRemoved: nil,
+		RenamedFile:  "",
+	}
+	if !reflect.DeepEqual(commit.ChangedFiles[0], expected) {
+		t.Errorf("Expected %v, but got %v", expected, commit.ChangedFiles[0])
+	}
+}
+
 func TestCommitInfo_AddChangedFileMoved(t *testing.T) {
 	addLines := 11
 	removedLines := 22
