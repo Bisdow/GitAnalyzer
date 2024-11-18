@@ -26,7 +26,7 @@ func CliOutput(filesMap map[string]commitAnalyzer.File) {
 	maxRecentCommitScore := maxRecentCommitScore(files)
 
 	fmt.Println("======================================================================================")
-	fmt.Printf("Change-Quote (absolute Changes) === RecentCommitScore === Lines of Code  === Filename\n")
+	fmt.Printf("Change-Quote (absolute Changes) === RecentCommitScore === ComplexityByIndent === Lines of Code  === Filename\n")
 	fmt.Println("======================================================================================")
 	for _, file := range files {
 		currentAmmount := file.ChangeAmount(true)
@@ -37,7 +37,7 @@ func CliOutput(filesMap map[string]commitAnalyzer.File) {
 			break
 		}
 
-		fmt.Printf("Change-Quote %1.2f ( %5d ) === RCS %4d === LoC %6d === %s\n", normalizedAmount, currentAmmount, recentCommitScore, file.Content.LinesOfCode, file.FileId)
+		fmt.Printf("Change-Quote %1.2f ( %5d ) === RCS %4d === CBI %4d === LoC %6d === %s\n", normalizedAmount, currentAmmount, recentCommitScore, file.Content.ComplexityByIndent, file.Content.LinesOfCode, file.FileId)
 
 	}
 }

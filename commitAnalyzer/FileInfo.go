@@ -2,6 +2,7 @@ package commitAnalyzer
 
 import (
 	"Code_Analyzer/gitLog"
+	"bufio"
 	"github.com/boyter/scc/processor"
 	"os"
 	"path/filepath"
@@ -18,10 +19,11 @@ type File struct {
 }
 
 type FileContent struct {
-	Language        string
-	LinesOfCode     int64
-	LinesOfComments int64
-	LinesBlank      int64
+	Language           string
+	LinesOfCode        int64
+	LinesOfComments    int64
+	LinesBlank         int64
+	ComplexityByIndent int
 }
 
 func NewFile(fileId string) *File {
@@ -98,4 +100,42 @@ func (f *File) AnalyzeContent() {
 	f.Content.LinesOfCode = filejob.Code
 	f.Content.LinesOfComments = filejob.Comment
 	f.Content.LinesBlank = filejob.Blank
+
+	complexity, err := f.calcComplexityByIndent()
+	if err != nil {
+		return
+	}
+	f.Content.ComplexityByIndent = complexity
+}
+
+func (f *File) calcComplexityByIndent() (int, error) {
+	file, err := os.Open(f.FileId)
+	if err != nil {
+		return 0, err
+	}
+	defer file.Close()
+
+	scanner := bufio.NewScanner(file)
+	maxIndent := 0
+
+	for scanner.Scan() {
+		line := scanner.Text()
+		indent := 0
+		for _, char := range line {
+			if char == ' ' || char == '\t' {
+				indent++
+			} else {
+				break
+			}
+		}
+		if indent > maxIndent {
+			maxIndent = indent
+		}
+	}
+
+	if err := scanner.Err(); err != nil {
+		return 0, err
+	}
+
+	return maxIndent, nil
 }
